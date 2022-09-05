@@ -1,29 +1,27 @@
+import Utils.hash
 import java.math.BigDecimal
-import java.security.MessageDigest
-import kotlin.random.Random
+import java.math.BigDecimal.ZERO
 
-data class Wallet(val address: String = createAddress(), var balance: BigDecimal = BigDecimal.ZERO) {
+data class Wallet(val address: String = createAddress(), var balance: BigDecimal = ZERO) {
+
     fun sendTo(otherWallet: Wallet, amount: BigDecimal) {
-        otherWallet.balance += amount
-        balance -= amount
+        when {
+            amount < ZERO -> fail("The amount to send must be greater than 0")
+            balance < amount -> fail("Not enough money in your wallet")
+            else -> {
+                otherWallet.balance += amount
+                balance -= amount
+            }
+        }
+    }
+
+    private fun fail(message: String): Nothing {
+        throw WalletBalanceException(message)
     }
 
     companion object {
-        private val charPool = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-
         private fun createAddress(): String {
-            return "WICOIN" + MessageDigest
-                .getInstance("SHA-256")
-                .digest(generateRandomByteArray())
-                .fold("") { acc, byte -> acc + "%02x".format(byte) }
-        }
-
-        private fun generateRandomByteArray(): ByteArray {
-            return (1..32)
-                .map { Random.nextInt(0, charPool.size) }
-                .map(charPool::get)
-                .joinToString("")
-                .toByteArray()
+            return "WICOIN" + hash("SHA-256")
         }
     }
 }
