@@ -1,4 +1,7 @@
-/.idea*
-/gradle*
-gradle*
-/.gradle*
+.gradle/
+.idea/
+build/
+gradle/
+gradlew
+gradlew.bat
+gradle.properties
