@@ -11,7 +11,6 @@ class BlockChain {
         lastBlock = newBlock
     }
 
-    fun print() = blocks.forEach(::println)
     fun size() = blocks.size
     fun lastBlock() = lastBlock
 }

@@ -11,10 +11,12 @@ data class Wallets(private val wallets: MutableMap<String, Wallet> = mutableMapO
 
     fun updateWallets(block: Block) {
         block.data.forEach { transaction ->
-            wallets[transaction.senderAddress]?.let { it.balance -= transaction.amount }
-            wallets[transaction.receiverAddress]?.let { it.balance += transaction.amount }
+            updateAmount(transaction.senderAddress, transaction.amount.negate())
+            updateAmount(transaction.receiverAddress, transaction.amount)
         }
     }
+
+    private fun updateAmount(address: String, amount: BigDecimal) = wallets[address]?.let { it.balance += amount }
 }
 
 data class Wallet(var address: String = "", var balance: BigDecimal = BigDecimal.ZERO) {

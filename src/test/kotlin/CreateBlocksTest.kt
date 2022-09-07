@@ -24,11 +24,8 @@ class CreateBlocksTest {
     @Test
     fun `should create three blocs with transactions between two wallets`() {
         val wallets = Wallets()
-        val firstWallet = Wallet(balance = valueOf(100))
-        wallets.add(firstWallet)
-        val secondWallet = Wallet(balance = valueOf(100))
-        wallets.add(secondWallet)
-
+        val firstWallet = wallets.add(Wallet(balance = valueOf(100)))
+        val secondWallet = wallets.add(Wallet(balance = valueOf(100)))
 
         val firstBlock = Block(
             previousHash = FIRST_HASH,
@@ -90,9 +87,7 @@ class CreateBlocksTest {
             )
             wallets.updateWallets(blockChain.lastBlock())
         }
-
-        blockChain.print()
-
+        
         assertThat(firstWallet.balance).isEqualTo(valueOf(855))
         assertThat(secondWallet.balance).isEqualTo(valueOf(245))
         assertThat(blockChain.size()).isEqualTo(11)
