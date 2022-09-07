@@ -101,10 +101,8 @@ class CreateBlocksTest {
     @Test
     fun `should create a block with a few transactions`() {
         val wallets = Wallets()
-        val firstWallet = Wallet(balance = valueOf(100))
-        wallets.add(firstWallet)
-        val secondWallet = Wallet(balance = valueOf(200))
-        wallets.add(secondWallet)
+        val firstWallet = wallets.add(Wallet(balance = valueOf(100)))
+        val secondWallet = wallets.add(Wallet(balance = valueOf(200)))
         val blockChain = BlockChain()
 
         val transactions = listOf(
@@ -112,7 +110,7 @@ class CreateBlocksTest {
             Transaction(secondWallet.address, firstWallet.address, valueOf(55.55)),
             Transaction(firstWallet.address, secondWallet.address, valueOf(37.28)),
             Transaction(secondWallet.address, firstWallet.address, valueOf(11.99)),
-            Transaction(firstWallet.address, secondWallet.address, valueOf(8.03)),
+            Transaction(firstWallet.address, secondWallet.address, valueOf(8.03))
         )
 
         blockChain.add(transactions)
