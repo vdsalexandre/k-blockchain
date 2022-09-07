@@ -1,5 +1,4 @@
 import assertk.assertThat
-import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal.valueOf
@@ -10,12 +9,16 @@ class CreateBlocksTest {
         val firstWallet = Wallet(balance = valueOf(10))
         val secondWallet = Wallet(balance = valueOf(125))
         val amount = valueOf(32.50)
-        val firstBlock = Block(previousHash = FIRST_HASH, data = listOf("${firstWallet.address}||${secondWallet.address}||$amount"))
+        val firstBlock =
+            Block(
+                previousHash = FIRST_HASH,
+                data = listOf(Transaction(firstWallet.address, secondWallet.address, amount))
+            )
 
         assertThat(firstBlock.previousHash).isEqualTo("0")
-        assertThat(firstBlock.data[0]).contains(firstWallet.address)
-        assertThat(firstBlock.data[0]).contains(secondWallet.address)
-        assertThat(firstBlock.data[0]).contains("$amount")
+        assertThat(firstBlock.data[0].senderAddress).isEqualTo(firstWallet.address)
+        assertThat(firstBlock.data[0].receiverAddress).isEqualTo(secondWallet.address)
+        assertThat(firstBlock.data[0].amount).isEqualTo(amount)
     }
 
     @Test
@@ -29,21 +32,21 @@ class CreateBlocksTest {
 
         val firstBlock = Block(
             previousHash = FIRST_HASH,
-            data = listOf("${firstWallet.address}||${secondWallet.address}||37.50")
+            data = listOf(Transaction(firstWallet.address, secondWallet.address, valueOf(37.50)))
         )
 
         wallets.updateWallets(firstBlock)
 
         val secondBlock = Block(
             previousHash = firstBlock.hash,
-            data = listOf("${firstWallet.address}||${secondWallet.address}||12.25")
+            data = listOf(Transaction(firstWallet.address, secondWallet.address, valueOf(12.25)))
         )
 
         wallets.updateWallets(secondBlock)
 
         val thirdBlock = Block(
             previousHash = secondBlock.hash,
-            data = listOf("${secondWallet.address}||${firstWallet.address}||8.22")
+            data = listOf(Transaction(secondWallet.address, firstWallet.address, valueOf(8.22)))
         )
 
         wallets.updateWallets(thirdBlock)
@@ -56,30 +59,68 @@ class CreateBlocksTest {
     }
 
     @Test
-    fun `should create a blockchain with three blocks and transactions`() {
+    fun `should create a blockchain with three blocks + initialization block`() {
         val blockChain = BlockChain()
 
-        val firstBlock = Block(
-            previousHash = FIRST_HASH,
-            data = listOf("1020304050||1122334455||17.35")
-        )
-        blockChain.add(firstBlock)
+        blockChain.add(listOf(Transaction("1020304050", "1122334455", valueOf(17.35))))
 
-        val secondBlock = Block(
-            previousHash = firstBlock.hash,
-            data = listOf("1020304050||1122334455||14.78")
-        )
-        blockChain.add(secondBlock)
+        blockChain.add(listOf(Transaction("1020304050", "1122334455", valueOf(14.78))))
 
-        val thirdBlock = Block(
-            previousHash = secondBlock.hash,
-            data = listOf("1122334455||1020304050||89.89")
-        )
-        blockChain.add(thirdBlock)
+        blockChain.add(listOf(Transaction("1122334455", "1020304050", valueOf(89.89))))
+
+        assertThat(blockChain.size()).isEqualTo(4)
+    }
+
+    @Test
+    fun `should find previous block from another block`() {
+        val blockChain = BlockChain()
+        val wallets = Wallets()
+        val firstWallet = wallets.add(Wallet(balance = valueOf(1000)))
+        val secondWallet = wallets.add(Wallet(balance = valueOf(100)))
+
+        for (i in 0..9) {
+            blockChain.add(
+                listOf(
+                    Transaction(
+                        senderAddress = firstWallet.address,
+                        receiverAddress = secondWallet.address,
+                        amount = valueOf(i + 10L)
+                    )
+                )
+            )
+            wallets.updateWallets(blockChain.lastBlock())
+        }
 
         blockChain.print()
 
-        assertThat(blockChain.size()).isEqualTo(3)
+        assertThat(firstWallet.balance).isEqualTo(valueOf(855))
+        assertThat(secondWallet.balance).isEqualTo(valueOf(245))
+        assertThat(blockChain.size()).isEqualTo(11)
+    }
+
+    @Test
+    fun `should create a block with a few transactions`() {
+        val wallets = Wallets()
+        val firstWallet = Wallet(balance = valueOf(100))
+        wallets.add(firstWallet)
+        val secondWallet = Wallet(balance = valueOf(200))
+        wallets.add(secondWallet)
+        val blockChain = BlockChain()
+
+        val transactions = listOf(
+            Transaction(firstWallet.address, secondWallet.address, valueOf(15.75)),
+            Transaction(secondWallet.address, firstWallet.address, valueOf(55.55)),
+            Transaction(firstWallet.address, secondWallet.address, valueOf(37.28)),
+            Transaction(secondWallet.address, firstWallet.address, valueOf(11.99)),
+            Transaction(firstWallet.address, secondWallet.address, valueOf(8.03)),
+        )
+
+        blockChain.add(transactions)
+        wallets.updateWallets(blockChain.lastBlock())
+
+        assertThat(firstWallet.balance).isEqualTo(valueOf(106.48))
+        assertThat(secondWallet.balance).isEqualTo(valueOf(193.52))
+        assertThat(blockChain.size()).isEqualTo(2)
     }
 
     companion object {
