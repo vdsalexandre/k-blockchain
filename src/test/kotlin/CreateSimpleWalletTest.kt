@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal.valueOf
 
-class CreateBlockchainTest {
+class CreateSimpleWalletTest {
 
     @Test
     fun `should be able to create an address in a wallet`() {

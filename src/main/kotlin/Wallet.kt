@@ -3,7 +3,11 @@ import Utils.hash
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 
-data class Wallet(val address: String = createAddress(), var balance: BigDecimal = ZERO) {
+data class Wallet(var address: String = "", var balance: BigDecimal = ZERO) {
+
+    init {
+        address = "WICOIN" + hash("SHA-256")
+    }
 
     fun sendTo(otherWallet: Wallet, amount: BigDecimal) {
         when {
@@ -13,12 +17,6 @@ data class Wallet(val address: String = createAddress(), var balance: BigDecimal
                 otherWallet.balance += amount
                 balance -= amount
             }
-        }
-    }
-
-    companion object {
-        private fun createAddress(): String {
-            return "WICOIN" + hash("SHA-256")
         }
     }
 }
