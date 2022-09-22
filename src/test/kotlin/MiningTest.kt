@@ -1,35 +1,28 @@
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal.TEN
+import java.math.BigDecimal.valueOf
 
 class MiningTest {
-    private val wallets = Wallets()
-    private lateinit var wallet1: Wallet
-    private lateinit var wallet2: Wallet
-    private lateinit var wallet3: Wallet
-    private lateinit var wallet4: Wallet
-
-    @BeforeEach
-    internal fun setUp() {
-        wallet1 = wallets.add(Wallet())
-        wallet2 = wallets.add(Wallet())
-        wallet3 = wallets.add(Wallet())
-        wallet4 = wallets.add(Wallet())
+    companion object {
+        private val wallets = Wallets()
+        private val wallet1 = wallets.add(Wallet(balance = valueOf(100)))
+        private val wallet2 = wallets.add(Wallet(balance = valueOf(200)))
+        private val wallet3 = wallets.add(Wallet(balance = valueOf(300)))
+        private val wallet4 = wallets.add(Wallet(balance = valueOf(400)))
     }
 
     @Test
     fun `should mine one block and add it to the blockchain`() {
-        val wicoinBlockchain = BlockChain()
+        val wicoinBlockchain = BlockChain(difficulty = 3)
         wicoinBlockchain.add(
             listOf(
-                Transaction(senderAddress = wallet1.address, receiverAddress = wallet2.address, amount = TEN),
-                Transaction(senderAddress = wallet1.address, receiverAddress = wallet3.address, amount = TEN),
-                Transaction(senderAddress = wallet4.address, receiverAddress = wallet1.address, amount = TEN),
-                Transaction(senderAddress = wallet2.address, receiverAddress = wallet4.address, amount = TEN),
-                Transaction(senderAddress = wallet3.address, receiverAddress = wallet1.address, amount = TEN)
+                Transaction(senderAddress = wallet1.address, receiverAddress = wallet2.address, amount = valueOf(25)),
+                Transaction(senderAddress = wallet1.address, receiverAddress = wallet3.address, amount = valueOf(50)),
+                Transaction(senderAddress = wallet4.address, receiverAddress = wallet1.address, amount = valueOf(22)),
+                Transaction(senderAddress = wallet2.address, receiverAddress = wallet4.address, amount = valueOf(35)),
+                Transaction(senderAddress = wallet3.address, receiverAddress = wallet1.address, amount = valueOf(12.50))
             )
         )
-
-        wicoinBlockchain.print()
+        wallets.updateWallets(wicoinBlockchain)
+        wallets.print()
     }
 }

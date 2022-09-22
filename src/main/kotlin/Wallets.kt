@@ -1,4 +1,4 @@
-import Utils.hash
+import bootstrap.Utils.hash
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 
@@ -6,12 +6,16 @@ data class Wallets(private val wallets: MutableMap<String, Wallet> = mutableMapO
 
     fun add(wallet: Wallet) = wallet.also { wallets[wallet.address] = it }
 
-    fun updateWallets(block: Block) {
-        block.data.forEach { transaction ->
-            updateAmount(transaction.senderAddress, transaction.amount.negate())
-            updateAmount(transaction.receiverAddress, transaction.amount)
+    fun updateWallets(blockchain: BlockChain) {
+        blockchain.allBlocks().forEach {block ->
+            block.data.forEach {transaction ->
+                updateAmount(transaction.senderAddress, transaction.amount.negate())
+                updateAmount(transaction.receiverAddress, transaction.amount)
+            }
         }
     }
+
+    fun print() = wallets.forEach(::println)
 
     private fun updateAmount(address: String, amount: BigDecimal) = wallets[address]?.let { it.balance += amount }
 }

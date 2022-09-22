@@ -1,4 +1,4 @@
-import Utils.fail
+import bootstrap.Utils.fail
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 

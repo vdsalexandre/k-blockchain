@@ -1,4 +1,4 @@
-import Utils.hash
+import bootstrap.Utils.hash
 import java.time.Instant
 
 class BlockChain(difficulty: Int = 5) {
@@ -25,7 +25,7 @@ class BlockChain(difficulty: Int = 5) {
 
     fun size() = blocks.size
 
-    fun lastBlock() = lastBlock
+    fun allBlocks() = blocks.toList()
 
     fun isValid(): Boolean {
         for (i in 1 until blocks.size) {

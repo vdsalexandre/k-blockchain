@@ -1,5 +1,6 @@
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import exception.WalletBalanceException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal.valueOf
@@ -40,40 +41,6 @@ class CreateBlocksTest {
     }
 
     @Test
-    fun `should create three blocs with transactions between two wallets`() {
-        val wallets = Wallets()
-        val firstWallet = wallets.add(Wallet(balance = valueOf(100)))
-        val secondWallet = wallets.add(Wallet(balance = valueOf(100)))
-
-        val firstBlock = Block(
-            previousHash = FIRST_HASH,
-            data = listOf(Transaction(firstWallet.address, secondWallet.address, valueOf(37.50)))
-        )
-
-        wallets.updateWallets(firstBlock)
-
-        val secondBlock = Block(
-            previousHash = firstBlock.hash,
-            data = listOf(Transaction(firstWallet.address, secondWallet.address, valueOf(12.25)))
-        )
-
-        wallets.updateWallets(secondBlock)
-
-        val thirdBlock = Block(
-            previousHash = secondBlock.hash,
-            data = listOf(Transaction(secondWallet.address, firstWallet.address, valueOf(8.22)))
-        )
-
-        wallets.updateWallets(thirdBlock)
-
-        assertThat(firstWallet.balance).isEqualTo(valueOf(58.47))
-        assertThat(secondWallet.balance).isEqualTo(valueOf(141.53))
-        assertThat(thirdBlock.previousHash).isEqualTo(secondBlock.hash)
-        assertThat(secondBlock.previousHash).isEqualTo(firstBlock.hash)
-        assertThat(firstBlock.previousHash).isEqualTo(FIRST_HASH)
-    }
-
-    @Test
     fun `should create a blockchain with three blocks + initialization block`() {
         val blockChain = BlockChain(1)
 
@@ -103,9 +70,10 @@ class CreateBlocksTest {
                     )
                 )
             )
-            wallets.updateWallets(blockChain.lastBlock())
         }
-        
+
+        wallets.updateWallets(blockChain)
+
         assertThat(firstWallet.balance).isEqualTo(valueOf(855))
         assertThat(secondWallet.balance).isEqualTo(valueOf(245))
         assertThat(blockChain.size()).isEqualTo(11)
@@ -127,7 +95,7 @@ class CreateBlocksTest {
         )
 
         blockChain.add(transactions)
-        wallets.updateWallets(blockChain.lastBlock())
+        wallets.updateWallets(blockChain)
 
         assertThat(firstWallet.balance).isEqualTo(valueOf(106.48))
         assertThat(secondWallet.balance).isEqualTo(valueOf(193.52))

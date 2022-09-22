@@ -1,3 +1,6 @@
+package bootstrap
+
+import exception.WalletBalanceException
 import java.security.MessageDigest
 import kotlin.random.Random
 
