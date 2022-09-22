@@ -1,13 +1,10 @@
-import Utils.fail
 import Utils.hash
 import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
 
 data class Wallets(private val wallets: MutableMap<String, Wallet> = mutableMapOf()) {
 
-    fun add(wallet: Wallet): Wallet {
-        wallets[wallet.address] = wallet
-        return wallet
-    }
+    fun add(wallet: Wallet) = wallet.also { wallets[wallet.address] = it }
 
     fun updateWallets(block: Block) {
         block.data.forEach { transaction ->
@@ -19,20 +16,7 @@ data class Wallets(private val wallets: MutableMap<String, Wallet> = mutableMapO
     private fun updateAmount(address: String, amount: BigDecimal) = wallets[address]?.let { it.balance += amount }
 }
 
-data class Wallet(var address: String = "", var balance: BigDecimal = BigDecimal.ZERO) {
-
-    init {
-        address = "WICOIN" + hash("SHA-256")
-    }
-
-    fun sendTo(otherWallet: Wallet, amount: BigDecimal) {
-        when {
-            amount < BigDecimal.ZERO -> fail("The amount to send must be greater than 0")
-            balance < amount -> fail("Not enough money in your wallet")
-            else -> {
-                otherWallet.balance += amount
-                balance -= amount
-            }
-        }
-    }
-}
+data class Wallet(
+    val address: String = "WICOIN" + hash("SHA-256"),
+    var balance: BigDecimal = ZERO
+)
