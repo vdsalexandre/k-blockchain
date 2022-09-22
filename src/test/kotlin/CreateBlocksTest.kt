@@ -1,9 +1,27 @@
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal.valueOf
 
 class CreateBlocksTest {
+
+    @Test
+    internal fun `should throw exception if transaction contains a negative amount`() {
+        val wallets = Wallets()
+        val firstWallet = wallets.add(Wallet())
+        val secondWallet = wallets.add(Wallet())
+        val wrongAmount = valueOf(-10)
+
+        val exception = assertThrows<WalletBalanceException> {
+
+            listOf(
+                Transaction(firstWallet.address, secondWallet.address, wrongAmount)
+            )
+        }
+        assertThat(exception.message).isEqualTo("The amount of a transaction must be superior than 0, it was $wrongAmount")
+    }
+
     @Test
     fun `should create the first bloc with a transaction between two wallets`() {
         val firstWallet = Wallet(balance = valueOf(10))
@@ -57,7 +75,7 @@ class CreateBlocksTest {
 
     @Test
     fun `should create a blockchain with three blocks + initialization block`() {
-        val blockChain = BlockChain()
+        val blockChain = BlockChain(1)
 
         blockChain.add(listOf(Transaction("1020304050", "1122334455", valueOf(17.35))))
 
@@ -70,7 +88,7 @@ class CreateBlocksTest {
 
     @Test
     fun `should find previous block from another block`() {
-        val blockChain = BlockChain()
+        val blockChain = BlockChain(1)
         val wallets = Wallets()
         val firstWallet = wallets.add(Wallet(balance = valueOf(1000)))
         val secondWallet = wallets.add(Wallet(balance = valueOf(100)))
@@ -98,7 +116,7 @@ class CreateBlocksTest {
         val wallets = Wallets()
         val firstWallet = wallets.add(Wallet(balance = valueOf(100)))
         val secondWallet = wallets.add(Wallet(balance = valueOf(200)))
-        val blockChain = BlockChain()
+        val blockChain = BlockChain(1)
 
         val transactions = listOf(
             Transaction(firstWallet.address, secondWallet.address, valueOf(15.75)),

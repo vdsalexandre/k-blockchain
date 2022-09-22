@@ -1,10 +1,8 @@
 import Utils.hash
 import java.time.Instant
 
-class BlockChain {
-    private val difficulty = 5
+class BlockChain(difficulty: Int = 5) {
     private val validPrefix = "0".repeat(difficulty)
-
     private val blocks: MutableList<Block> = mutableListOf()
     private var lastBlock: Block
 
