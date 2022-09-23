@@ -1,26 +1,40 @@
-import bootstrap.Utils.hash
+import bootstrap.Utils.fail
+import bootstrap.Utils.generateKeyPair
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
 
-data class Wallets(private val wallets: MutableMap<String, Wallet> = mutableMapOf()) {
+data class Wallets(private val wallets: MutableMap<RSAPublicKey, Wallet> = mutableMapOf()) {
 
-    fun add(wallet: Wallet) = wallet.also { wallets[wallet.address] = it }
+    fun add(wallet: Wallet) = wallets.putIfAbsent(wallet.publicKey(), wallet)
 
-    fun updateWallets(blockchain: BlockChain) {
-        blockchain.allBlocks().forEach {block ->
-            block.data.forEach {transaction ->
-                updateAmount(transaction.senderAddress, transaction.amount.negate())
-                updateAmount(transaction.receiverAddress, transaction.amount)
-            }
-        }
-    }
+    operator fun get(publicKey: RSAPublicKey) = wallets[publicKey]
 
-    fun print() = wallets.forEach(::println)
-
-    private fun updateAmount(address: String, amount: BigDecimal) = wallets[address]?.let { it.balance += amount }
+    fun getWallets() = wallets.map { it.value }
 }
 
-data class Wallet(
-    val address: String = "WICOIN" + hash("SHA-256"),
-    var balance: BigDecimal = ZERO
-)
+data class Wallet(var publicKey: RSAPublicKey? = null, private var privateKey: RSAPrivateKey? = null) {
+
+    init {
+        val keyPair = generateKeyPair()
+        publicKey = keyPair.public as RSAPublicKey
+        privateKey = keyPair.private as RSAPrivateKey
+    }
+
+    fun publicKey() = publicKey ?: fail("Error - pair of keys generation failed")
+
+    fun getBalance(blockchain: BlockChain): BigDecimal {
+        return blockchain.blocks().map { block ->
+           block.data.fold(initial = ZERO) { acc, transaction ->
+                with(transaction) {
+                    when {
+                        hasSender(publicKey()) -> acc + amount.negate()
+                        hasReceiver(publicKey()) -> acc + amount
+                        else -> acc
+                    }
+                }
+            }
+        }.sumOf { it }
+    }
+}

@@ -1,7 +1,7 @@
 import bootstrap.Utils.hash
 import java.time.Instant
 
-class BlockChain(difficulty: Int = 5) {
+class BlockChain(difficulty: Int = 5, initialData: List<Transaction> = listOf()) {
     private val validPrefix = "0".repeat(difficulty)
     private val blocks: MutableList<Block> = mutableListOf()
     private var lastBlock: Block
@@ -9,7 +9,7 @@ class BlockChain(difficulty: Int = 5) {
     init {
         blocks.add(
             mine(
-                Block(previousHash = "0", data = listOf())
+                Block(previousHash = "0", data = initialData)
             )
         )
         lastBlock = blocks[0]
@@ -25,7 +25,7 @@ class BlockChain(difficulty: Int = 5) {
 
     fun size() = blocks.size
 
-    fun allBlocks() = blocks.toList()
+    fun blocks() = blocks.toList()
 
     fun isValid(): Boolean {
         for (i in 1 until blocks.size) {
@@ -41,9 +41,7 @@ class BlockChain(difficulty: Int = 5) {
         return true
     }
 
-    fun print() {
-        blocks.forEach(::println)
-    }
+    fun print() = blocks.forEach(::println)
 
     private fun mine(block: Block): Block {
         var minedBlock = block.copy()
