@@ -41,8 +41,6 @@ class BlockChain(difficulty: Int = 5, initialData: List<Transaction> = listOf())
         return true
     }
 
-    fun print() = blocks.forEach(::println)
-
     private fun mine(block: Block): Block {
         var minedBlock = block.copy()
         while (!isMined(minedBlock)) {

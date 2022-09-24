@@ -5,12 +5,12 @@ import bootstrap.Utils.generateRandomSalt
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import java.security.Key
-import java.security.interfaces.RSAPublicKey
+import java.security.PublicKey
 import java.util.Base64
 
 data class Transaction(
-    val senderKey: RSAPublicKey,
-    val receiverKey: RSAPublicKey,
+    val senderKey: PublicKey,
+    val receiverKey: PublicKey,
     val amount: BigDecimal,
     var transactionHash: String = ""
 ) {
@@ -20,9 +20,9 @@ data class Transaction(
         transactionHash = Utils.hash("SHA-256", "$senderKey$receiverKey$amount${generateRandomSalt()}")
     }
 
-    fun hasSender(publicKey: RSAPublicKey) = senderKey == publicKey
+    fun hasSender(publicKey: PublicKey) = senderKey == publicKey
 
-    fun hasReceiver(publicKey: RSAPublicKey) = receiverKey == publicKey
+    fun hasReceiver(publicKey: PublicKey) = receiverKey == publicKey
 
     override fun toString(): String {
         return buildString {

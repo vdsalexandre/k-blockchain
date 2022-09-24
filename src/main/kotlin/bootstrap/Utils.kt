@@ -8,8 +8,11 @@ import java.security.SecureRandom
 import kotlin.random.Random
 
 object Utils {
-
     val LINE_SEPARATOR: String = System.lineSeparator()
+
+    private const val KEY_SIZE = 2048
+    private const val RANDOM_STRING_LENGTH = 32
+    private const val KEYPAIR_ALGORITHM = "RSA"
 
     fun hash(algorithm: String, stringToHash: String = generateRandomString()): String {
         return MessageDigest
@@ -19,8 +22,8 @@ object Utils {
     }
 
     fun generateKeyPair(): KeyPair {
-        val pairGenerator = KeyPairGenerator.getInstance("RSA")
-        pairGenerator.initialize(2048, SecureRandom())
+        val pairGenerator = KeyPairGenerator.getInstance(KEYPAIR_ALGORITHM)
+        pairGenerator.initialize(KEY_SIZE, SecureRandom())
         return pairGenerator.generateKeyPair()
     }
 
@@ -28,7 +31,7 @@ object Utils {
 
     fun fail(message: String): Nothing = throw WalletBalanceException(message)
 
-    private fun generateRandomString(length: Int = 32): String {
+    private fun generateRandomString(length: Int = RANDOM_STRING_LENGTH): String {
         val charPool = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
         return (1..length)
